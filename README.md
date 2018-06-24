@@ -1,5 +1,7 @@
 # Lambdabox
 
+__This library is heavily under construction, including the readme which is now more of a design document!__
+
 _Lambdabox provides a generic embedded domain specific language (EDSL) in Haskell,
 for algorithmic trading (also known as blackbox trading) of cryptocurrencies on
 multiple exchanges._
