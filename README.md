@@ -32,17 +32,27 @@ the underlying exchanges.
 
 Table of the supported exchanges and what kind of features.
 
-## EDSLs
+## EDSL
 
-The library provides a two way flavoured common EDSL for communicating with multiple
-cryptocurrency exchanges.
-
-### Static EDSL
-
-The first flavour is a static EDSL that leverages Haskells strong typesystem providing that each action is checked for
+Lambdabox provides an EDSL that leverages Haskells strong typesystem providing that each action is checked for
 correctness at compile time. For example, when creating a trade in Lambdabox, Haskell will check on
 compile time wether an exchange actually provides a certain trading pair. Algorithmic trading systems can manage large amount of capital and this kind of safety is crucial in critical systems as such. For more information on the static
 EDSL see the documentation.
+
+An example of creating a simple trade:
+
+```Haskell
+import Lambdabox.Static.Currency
+import Lambdabox.Static.Exchange
+import Lambdabox.Static.Trade
+
+main :: IO ()
+main = let symbol = buy ADA/BTC `on` Binance
+           order  = LimitOrder GoodTilCanceled 20000 0.13
+       in $ do
+       response <- trade symbol order
+       print response
+```
 
 An example of the creating a trade based on a local orderbook with the static EDSL:
 
@@ -61,21 +71,6 @@ main = runBox configuration $ do
     r  <- register (marketOrderAdaBtc 2000) (< 200) ob
     print r
 ```
-
-### Dynamic EDSL
-
-Algorithmic trading systems can be implemented in a way that before compile time,
-different trading pairs are not known. Therefore, Lambdabox also provides a dynamic
-EDSL, that is much more flexiable but looses the safety properties of its static
-sister. For more information on the dynamic EDSL see the documentation.
-
-An example of ... with the dynamic EDSL:
-
-```Haskell
--- | Dynamic DSL Example
-```
-
-_Interesting point: the static DSL is actually compiled into dynamic DSL (see documentation for more information)._
 
 ## Documentation
 

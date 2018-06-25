@@ -1,4 +1,4 @@
-module Lambdabox.Static.Exchange
+module Lambdabox.Exchange
     ( Exchange
     , Binance(..)
     ) where

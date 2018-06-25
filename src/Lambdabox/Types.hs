@@ -4,6 +4,8 @@ module Lambdabox.Types
     , TimeInForce(..)
     ) where
 
+
+
 data Order = Order { testOrder :: String }
 
 data OrderResponse = OrderResponse { test :: Int }

@@ -21,7 +21,7 @@ import Data.Aeson.Extended (Unit)
 
 -- | Create a trade on binance based on an BinanceOrder.
 trade :: Text 
-      -> Side 
+      -> Text 
       -> BinanceOrder
       -> Maybe Text 
       -> Maybe ResponseType 
@@ -36,7 +36,7 @@ trade symbol side binanceOrder newClientOrderId responseType recvWindow =
 -- FromJSON instance for empty bodies in Aeson this unit value gets replaced
 -- with a typical haskel ()
 testTrade :: Text 
-          -> Side 
+          -> Text 
           -> BinanceOrder
           -> Maybe Text 
           -> Maybe ResponseType 
@@ -49,7 +49,7 @@ testTrade symbol side binanceOrder newClientOrderId responseType recvWindow =
 
 -- | Prepares the trade for sending for both the trade and testTrade function.            
 prepareTrade :: Text 
-             -> Side 
+             -> Text 
              -> BinanceOrder
              -> Maybe Text 
              -> Maybe ResponseType 
