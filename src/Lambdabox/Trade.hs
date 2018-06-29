@@ -11,12 +11,13 @@ module Lambdabox.Trade
     ) where
 
 import Lambdabox.Box
-import Lambdabox.Types
 import Lambdabox.Exchange
 import Lambdabox.ExchangePair
 import Lambdabox.Trade.Tradeable
 import Lambdabox.Trade.Icebergable
 import Lambdabox.Trade.Side
+import Lambdabox.Trade.Order
+import Lambdabox.Trade.OrderResponse
 
 -- | Execute a trade based on a Symbol, an Exchange and an Order
 -- Example:

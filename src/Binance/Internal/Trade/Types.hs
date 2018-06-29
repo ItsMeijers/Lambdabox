@@ -4,8 +4,7 @@ module Binance.Internal.Trade.Types
     ( BinanceOrder(..)
     , ResponseType(..)
     , Side(..)
-    , TimeInForce(..)
-    , OrderResponse(..)
+    , BinanceOrderResponse(..)
     , Fill(..)
     , OrderStatus(..)
     , CancelOrder(..)
@@ -18,7 +17,7 @@ import Data.Text (Text)
 
 -- | Data for creating a order at Binance
 data BinanceOrder = LimitOrder 
-                        { tifLO        :: !TimeInForce
+                        { tifLO        :: !Text
                         , qtyLO        :: !Double
                         , priceLO      :: !Double
                         , icebergQtyLO :: !(Maybe Double)
@@ -31,7 +30,7 @@ data BinanceOrder = LimitOrder
                   | StopLossLimitOrder
                         { qtySLLO        :: !Double
                         , stopPriceSLLO  :: !Double
-                        , tifSLLO        :: !TimeInForce
+                        , tifSLLO        :: !Text
                         , priceSLLO      :: !Double
                         , icebergQtySLLO :: !(Maybe Double)
                         }
@@ -40,7 +39,7 @@ data BinanceOrder = LimitOrder
                         , stopPriceTP :: !Double
                         }
                   | TakeProfitLimit
-                        { tifTPL        :: !TimeInForce
+                        { tifTPL        :: !Text
                         , qtyTPL        :: !Double
                         , priceTPL      :: !Double
                         , stopPriceTPL  :: !Double
@@ -70,47 +69,42 @@ instance Show Side where
     show Buy  = "BUY"
     show Sell = "SELL"
 
-data TimeInForce = GTC
-                 | IOC
-                 | FOK
-                 deriving (Eq, Show)
+data BinanceOrderResponse = OrderResponseAcknowledge
+                               { symbol        :: !Text
+                               , orderId       :: !Int
+                               , clientOrderId :: !Text
+                               , transactTime  :: !Int
+                               } 
+                          | OrderResponseResult
+                               { symbol        :: !Text
+                               , orderId       :: !Int
+                               , clientOrderId :: !Text
+                               , transactTime  :: !Int
+                               , price         :: !Text
+                               , origQty       :: !Text
+                               , executedQty   :: !Text
+                               , status        :: !Text
+                               , timeInForce   :: !Text
+                               , kind          :: !Text
+                               , side          :: !Text
+                               }                  
+                          | OrderResponseFull
+                               { symbol        :: !Text
+                               , orderId       :: !Int
+                               , clientOrderId :: !Text
+                               , transactTime  :: !Int
+                               , price         :: !Text
+                               , origQty       :: !Text
+                               , executedQty   :: !Text
+                               , status        :: !Text
+                               , timeInForce   :: !Text
+                               , kind          :: !Text
+                               , side          :: !Text
+                               , fills         :: [Fill]
+                               } 
+                           deriving (Show, Eq, Generic)
 
-data OrderResponse = OrderResponseAcknowledge
-                        { symbol        :: !Text
-                        , orderId       :: !Int
-                        , clientOrderId :: !Text
-                        , transactTime  :: !Int
-                        } 
-                   | OrderResponseResult
-                        { symbol        :: !Text
-                        , orderId       :: !Int
-                        , clientOrderId :: !Text
-                        , transactTime  :: !Int
-                        , price         :: !Text
-                        , origQty       :: !Text
-                        , executedQty   :: !Text
-                        , status        :: !Text
-                        , timeInForce   :: !Text
-                        , kind          :: !Text
-                        , side          :: !Text
-                        }                  
-                   | OrderResponseFull
-                        { symbol        :: !Text
-                        , orderId       :: !Int
-                        , clientOrderId :: !Text
-                        , transactTime  :: !Int
-                        , price         :: !Text
-                        , origQty       :: !Text
-                        , executedQty   :: !Text
-                        , status        :: !Text
-                        , timeInForce   :: !Text
-                        , kind          :: !Text
-                        , side          :: !Text
-                        , fills         :: [Fill]
-                        } 
-                    deriving (Show, Eq, Generic)
-
-instance FromJSON OrderResponse where
+instance FromJSON BinanceOrderResponse where
     parseJSON = genericParseJSON typeToKindOptions
 
 data Fill = Fill

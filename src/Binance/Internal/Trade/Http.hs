@@ -26,7 +26,7 @@ trade :: Text
       -> Maybe Text 
       -> Maybe ResponseType 
       -> Maybe Int 
-      -> Binance OrderResponse
+      -> Binance BinanceOrderResponse
 trade symbol side binanceOrder newClientOrderId responseType recvWindow = 
     prepareTrade symbol side binanceOrder newClientOrderId responseType 
         recvWindow (postSigned "/api/v3/order")

@@ -1,7 +1,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 
 module Lambdabox.Translate
-    ( Translate
+    ( Translate (..)
     ) where
 
 import Data.Text(Text)

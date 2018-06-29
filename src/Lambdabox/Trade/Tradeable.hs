@@ -4,7 +4,6 @@ module Lambdabox.Trade.Tradeable
     ( Tradeable(..)
     ) where
 
-import Lambdabox.Types
 import Lambdabox.Box
 import Lambdabox.Exchange
 import Lambdabox.Symbol
