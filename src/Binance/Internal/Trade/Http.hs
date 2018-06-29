@@ -68,22 +68,22 @@ prepareTrade s side binanceOrder newClientOrderId responseType recvWindow f =
 -- | Creates the parameter list based on the type of BinanceOrder and the 
 -- record values that are within each type.
 paramsFromOrder :: BinanceOrder -> [(Text, Text)]
-paramsFromOrder LimitOrder { tifLO, qtyLO, priceLO, icebergQtyLO } =
+paramsFromOrder BinanceLimitOrder { tifLO, qtyLO, priceLO, icebergQtyLO } =
     [ ("type", "LIMIT")
     , ("timeInForce", toText tifLO)
     , ("quantity", toText qtyLO)
     , ("price", toText priceLO)
     ] ++ optionalParams ["icebergQty" :? icebergQtyLO]
-paramsFromOrder MarketOrder { qtyMO } =
+paramsFromOrder BinanceMarketOrder { qtyMO } =
     [ ("type", "MARKET")
     , ("quantity", toText qtyMO)
     ]
-paramsFromOrder StopLossOrder { qtySLO, stopPriceSLO} =
+paramsFromOrder BinanceStopLossOrder { qtySLO, stopPriceSLO} =
     [ ("type", "STOP_LOSS")
     , ("quantity", toText qtySLO)
     , ("stopPrice", toText stopPriceSLO)
     ]
-paramsFromOrder StopLossLimitOrder 
+paramsFromOrder BinanceStopLossLimitOrder 
         { qtySLLO, stopPriceSLLO, tifSLLO, priceSLLO, icebergQtySLLO } =
     [ ("type", "STOP_LOSS_LIMIT")
     , ("quantity", toText qtySLLO)
@@ -91,12 +91,12 @@ paramsFromOrder StopLossLimitOrder
     , ("timeInForce", toText tifSLLO)
     , ("price", toText priceSLLO)
     ] ++ optionalParams ["icebergQty" :? icebergQtySLLO]
-paramsFromOrder TakeProfit { qtyTP, stopPriceTP } =
+paramsFromOrder BinanceTakeProfit { qtyTP, stopPriceTP } =
     [ ("type", "TAKE_PROFIT")
     , ("quantity", toText qtyTP)
     , ("stopPrice", toText stopPriceTP)
     ]
-paramsFromOrder TakeProfitLimit 
+paramsFromOrder BinanceTakeProfitLimit 
         { tifTPL, qtyTPL, priceTPL, stopPriceTPL, icebergQtyTPL } =
     [ ("type", "TAKE_PROFIT_LIMIT")
     , ("timeInForce", toText tifTPL)
@@ -104,19 +104,19 @@ paramsFromOrder TakeProfitLimit
     , ("price", toText priceTPL)
     , ("stopPrice", toText stopPriceTPL)
     ] ++ optionalParams ["icebergQty" :? icebergQtyTPL]
-paramsFromOrder LimitMaker { qtyLM, priceLM } =
+paramsFromOrder BinanceLimitMaker { qtyLM, priceLM } =
     [ ("type", "LIMIT_MAKER")
     , ("quantity", toText qtyLM)
     , ("price", toText priceLM)
     ]
 
-queryOrderOnId :: Text -> Int -> Maybe Int -> Binance Order
+queryOrderOnId :: Text -> Int -> Maybe Int -> Binance PlacedOrder
 queryOrderOnId symbol orderId recvWindow = 
     getSigned "/api/v3/order" $ [ ("symbol", symbol)
                                 , ("orderId", toText orderId)
                                 ] ++ optionalParams ["recvWindow" :? recvWindow] 
 
-queryOrderOnClientId :: Text -> Text -> Maybe Int -> Binance Order
+queryOrderOnClientId :: Text -> Text -> Maybe Int -> Binance PlacedOrder
 queryOrderOnClientId symbol origClientOrderId recvWindow = 
     getSigned "/api/v3/order" $ [ ("symbol", symbol)
                                 , ("origClientOrderId", origClientOrderId)
@@ -155,7 +155,7 @@ currentOpenOrders symbol recvWindow =
                             ["symbol" :? symbol, "recvWindow" :? recvWindow]
 
 -- | List all the orders on Binance.
-allOrders :: Text -> Maybe Int -> Maybe Int -> Maybe Int -> Binance [Order]
+allOrders :: Text -> Maybe Int -> Maybe Int -> Maybe Int -> Binance [PlacedOrder]
 allOrders symbol orderId limit recvWindow =
     getSigned "/api/v3/allOrders" $ [("symbol", symbol)] ++ optionalParams
         ["orderId" :? orderId, "limit" :? limit, "recvWindow" :? recvWindow]

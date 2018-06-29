@@ -8,7 +8,7 @@ module Binance.Internal.Trade.Types
     , Fill(..)
     , OrderStatus(..)
     , CancelOrder(..)
-    , Order(..)
+    , PlacedOrder(..)
     ) where
 
 import GHC.Generics
@@ -16,36 +16,36 @@ import Data.Aeson.Extended
 import Data.Text (Text)
 
 -- | Data for creating a order at Binance
-data BinanceOrder = LimitOrder 
+data BinanceOrder = BinanceLimitOrder 
                         { tifLO        :: !Text
                         , qtyLO        :: !Double
                         , priceLO      :: !Double
                         , icebergQtyLO :: !(Maybe Double)
                         }
-                  | MarketOrder { qtyMO :: !Double }
-                  | StopLossOrder
+                  | BinanceMarketOrder { qtyMO :: !Double }
+                  | BinanceStopLossOrder
                         { qtySLO       :: !Double
                         , stopPriceSLO :: !Double 
                         }
-                  | StopLossLimitOrder
+                  | BinanceStopLossLimitOrder
                         { qtySLLO        :: !Double
                         , stopPriceSLLO  :: !Double
                         , tifSLLO        :: !Text
                         , priceSLLO      :: !Double
                         , icebergQtySLLO :: !(Maybe Double)
                         }
-                  | TakeProfit
+                  | BinanceTakeProfit
                         { qtyTP       :: !Double
                         , stopPriceTP :: !Double
                         }
-                  | TakeProfitLimit
+                  | BinanceTakeProfitLimit
                         { tifTPL        :: !Text
                         , qtyTPL        :: !Double
                         , priceTPL      :: !Double
                         , stopPriceTPL  :: !Double
                         , icebergQtyTPL :: !(Maybe Double)
                         }
-                  | LimitMaker
+                  | BinanceLimitMaker
                         { qtyLM   :: !Double
                         , priceLM :: !Double
                         }
@@ -145,7 +145,7 @@ data CancelOrder = CancelOrder
 
 instance FromJSON CancelOrder
 
-data Order = Order
+data PlacedOrder = PlacedOrder
     { symbol        :: !Text
     , orderId       :: !Int
     , clientOrderId :: !Text
@@ -162,5 +162,5 @@ data Order = Order
     , isWorking     :: !Bool
     } deriving (Show, Eq, Generic)
 
-instance FromJSON Order where
+instance FromJSON PlacedOrder where
     parseJSON = genericParseJSON typeToKindOptions
