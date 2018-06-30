@@ -28,8 +28,8 @@ newtype Box a = Box
                , MonadError Error)
 
 -- | Run the Binance Transformer stack
-runBox ::  Box a -> BoxConfiguration -> IO (Either Error a)
-runBox bc = runExceptT . runReaderT (run bc)
+runBox :: BoxConfiguration -> Box a -> IO (Either Error a)
+runBox bc box = runExceptT $ runReaderT (run box) bc
 
 data Error = Error
     { code :: !Int

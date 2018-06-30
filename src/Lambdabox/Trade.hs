@@ -2,6 +2,7 @@ module Lambdabox.Trade
     ( ExchangePairSide(..)
     , Tradeable(..)
     , Icebergable(..)
+    , Order(..)
     , trade
     , testTrade
     , iceberg
@@ -56,7 +57,22 @@ tradeBinanceOrder a b side order = do
 
 -- | Test a trade based on a Symbol, an Exchange and an Order
 testTrade :: Tradeable e a b => ExchangePairSide e a b -> Order -> Box ()
-testTrade es = undefined
+testTrade (ExchangePair e a b, s) o 
+    | isBinance e = testTradeBinanceOrder a b s o
+    | otherwise   = liftIO $ ioError $ userError "Not implemented Exchange found!"
+
+testTradeBinanceOrder :: (Symbol a, Symbol b)
+                      => a
+                      -> b
+                      -> Side
+                      -> Order
+                      -> Box ()
+testTradeBinanceOrder a b side order = do
+    let symbol   = translate Binance (a, b)
+        bSide    = translate Binance side
+        bOrder   = translate Binance order
+    BI.testTrade symbol bSide bOrder Nothing Nothing Nothing -- TODO add a way to incorperate the recvWindow etc
+    
 
 -- | Execute a trade in an icerberg fashion based on a Symbol, an Exchange and
 -- an Order. Note that not every exchange supports iceberging.
