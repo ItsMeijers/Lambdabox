@@ -12,18 +12,20 @@ module Lambdabox.Trade
     , sell
     ) where
 
-import Lambdabox.Box
-import Lambdabox.Symbol
-import Lambdabox.Exchange
-import Lambdabox.ExchangePair
-import Lambdabox.Translate
-import Lambdabox.Trade.Side
-import Lambdabox.Trade.Tradeable
-import Lambdabox.Trade.Icebergable
-import Lambdabox.Trade.Side
-import Lambdabox.Trade.Order
-import Lambdabox.Trade.OrderResponse
-import Data.Text (concat)
+import           Lambdabox.Box
+import           Lambdabox.Symbol
+import           Lambdabox.Exchange
+import           Lambdabox.ExchangePair
+import           Lambdabox.Translate
+import           Lambdabox.Trade.Side
+import           Lambdabox.Trade.Tradeable
+import           Lambdabox.Trade.Icebergable
+import           Lambdabox.Trade.Side
+import           Lambdabox.Trade.Order
+import           Lambdabox.Trade.OrderResponse
+import           Data.Text (concat)
+import           System.IO.Error (userError, ioError)
+import           Control.Monad.Except (liftIO)
 import qualified Binance.Internal.Trade.Http as BI
 
 -- | Execute a trade based on a Symbol, an Exchange and an Order
@@ -35,7 +37,9 @@ trade :: (Tradeable e a b)
       => ExchangePairSide e a b
       -> Order
       -> Box OrderResponse
-trade (ExchangePair Binance a b, s) o = tradeBinanceOrder a b s o
+trade (ExchangePair e a b, s) o 
+    | isBinance e = tradeBinanceOrder a b s o
+    | otherwise   = liftIO $ ioError $ userError "Not implemented Exchange found!"
 
 tradeBinanceOrder :: (Symbol a, Symbol b)
                   => a
