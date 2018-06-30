@@ -17,6 +17,7 @@ module Network.Wreq.Extended
     , OptionalParameter(..)
     ) where
 
+import              Lambdabox.Box
 import              Network.Wreq hiding (get, post, delete, put)
 import              Control.Lens ((&), (^.), (^?), (.~), set)
 import              Control.Monad.Reader
@@ -28,7 +29,6 @@ import              Data.Text (Text, pack, append)
 import              Data.Text.Encoding (encodeUtf8, decodeUtf8)
 import              Data.ByteString.Lazy (ByteString, empty)
 import              Data.Time.Clock.POSIX (getPOSIXTime)
-import              Binance.Internal.Types
 import              Crypto.MAC.HMAC (HMAC, hmac, hmacGetDigest)
 import              Crypto.Hash (Digest)
 import              Crypto.Hash.Algorithms (SHA256)
@@ -39,48 +39,48 @@ import qualified    Control.Exception   as E
 get :: forall a. (FromJSON a)
     => String 
     -> [(Text, Text)]
-    -> Binance a
+    -> Box a
 get uri params = httpRequest getWith uri params
 
 post :: forall a. (FromJSON a)
      => String 
      -> [(Text, Text)]
-     -> Binance a
+     -> Box a
 post uri params = httpRequest (\o s -> postWith o s empty) uri params
 
 put :: forall a. (FromJSON a)
     => String 
     -> [(Text, Text)]
-    -> Binance a
+    -> Box a
 put uri params = httpRequest (\o s -> putWith o s empty) uri params
 
 delete :: forall a. (FromJSON a)
        => String 
        -> [(Text, Text)]
-       -> Binance a
+       -> Box a
 delete uri params = httpRequest deleteWith uri params
 
 getSigned :: forall a. (FromJSON a) 
            => String
            -> [(Text, Text)]
-           -> Binance a
+           -> Box a
 getSigned uri params = signed params (get uri)
 
-postSigned :: forall a. (FromJSON a) => String -> [(Text, Text)] -> Binance a
+postSigned :: forall a. (FromJSON a) => String -> [(Text, Text)] -> Box a
 postSigned uri params = signed params (post uri)
 
-deleteSigned :: forall a. (FromJSON a) => String -> [(Text, Text)] -> Binance a
+deleteSigned :: forall a. (FromJSON a) => String -> [(Text, Text)] -> Box a
 deleteSigned uri params = signed params (delete uri)
 
 signed :: forall a. (FromJSON a) 
            => [(Text, Text)]
-           -> ([(Text, Text)] -> Binance a) -- Continuation Request
-           -> Binance a
+           -> ([(Text, Text)] -> Box a) -- Continuation Request
+           -> Box a
 signed params cRequest = do
-    binanceOptions <- ask
+    boxConfiguration <- ask
     timestamp      <- liftIO getTimeStamp
     let paramsT    =  ("timestamp", timestamp) : params 
-        signature  =  sign paramsT (secretKey binanceOptions)
+        signature  =  sign paramsT (secretKey boxConfiguration)
     cRequest (("signature", signature) : paramsT)  
 
 -- | Return timestamp in milliseconds
@@ -100,19 +100,19 @@ httpRequest :: forall a. (FromJSON a)
             => (Options -> String -> IO (Response ByteString))
             -> String 
             -> [(Text, Text)]
-            -> Binance a
+            -> Box a
 httpRequest request uri params = do
-    binanceOptions <- ask
-    _              <- liftIO $ putStrLn $ show $ buildOptions binanceOptions params
+    boxConfiguration <- ask
+    _              <- liftIO $ putStrLn $ show $ buildOptions boxConfiguration params
     response       <- liftIO $ request 
-                                (buildOptions binanceOptions params) 
+                                (buildOptions boxConfiguration params) 
                                 ("https://api.binance.com" ++ uri)
     liftEither $ foldResponse (response ^. responseStatus . statusCode) response 
 
 -- | Build the options for the http request based on a list of key value 
 -- parameters and setting the option of not checking the response and throwing
 -- an IO error.
-buildOptions :: BinanceOptions -> [(Text, Text)] -> Options
+buildOptions :: BoxConfiguration -> [(Text, Text)] -> Options
 buildOptions bo = foldl (\o (k, v) -> o & param k .~ [v]) (defaults' & key) 
     where defaults' = set checkResponse (Just $ \_ _ -> return ()) defaults
           key       = header "X-MBX-APIKEY" .~ [encodeUtf8 $ apiKey bo]
@@ -137,7 +137,7 @@ class ToText a where
     toText :: a -> Text
 
 instance {-# OVERLAPPING #-} ToText Text where
-    toText t = t
+    toText = id
     
 instance Show a => ToText a where
     toText = pack . show

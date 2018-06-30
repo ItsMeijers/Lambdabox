@@ -6,21 +6,21 @@ module Binance.Internal.Exchange.Http
     , exchangeInfo
     ) where
 
+import Lambdabox.Box
 import Network.Wreq.Extended
-import Binance.Internal.Types
 import Binance.Internal.Exchange.Types
 import Data.Aeson.Extended (Unit)
 
 -- | Pings the Binance server to check wether a connection can be made
-ping :: Binance ()
+ping :: Box ()
 ping = do
-    _ <- get "/api/v1/ping" [] :: Binance Unit
+    _ <- get "/api/v1/ping" [] :: Box Unit
     return ()
 
 -- | Retrieves the time from the Binance server
-binanceTime :: Binance ServerTime
+binanceTime :: Box ServerTime
 binanceTime = get "/api/v1/time" []
 
 -- | Retrieves the echange info of Binance
-exchangeInfo :: Binance ExchangeInfo
+exchangeInfo :: Box ExchangeInfo
 exchangeInfo = get "/api/v1/exchangeInfo" []

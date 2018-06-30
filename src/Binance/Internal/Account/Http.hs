@@ -5,12 +5,12 @@ module Binance.Internal.Account.Http
     , accountTrades
     ) where
 
-import Binance.Internal.Types
+import Lambdabox.Box
 import Binance.Internal.Account.Types
 import Network.Wreq.Extended
 import Data.Text (Text)
 
-accountInfo :: Maybe Int -> Binance Account
+accountInfo :: Maybe Int -> Box Account
 accountInfo recvWindow = getSigned "/api/v3/account" $ optionalParams 
                                         ["recvWindow" :? recvWindow]
 
@@ -18,7 +18,7 @@ accountTrades :: Text
                 -> Maybe Int 
                 -> Maybe Int 
                 -> Maybe Int 
-                -> Binance [AccountTrade]
+                -> Box [AccountTrade]
 accountTrades symbol limit fromId recvWindow =
     getSigned "/api/v3/myTrades" $ [("symbol", symbol)] ++ optionalParams 
         ["limit" :? limit, "fromId" :? fromId, "recvWindow" :? recvWindow]

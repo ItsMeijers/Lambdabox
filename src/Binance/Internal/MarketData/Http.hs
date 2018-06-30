@@ -14,20 +14,20 @@ module Binance.Internal.MarketData.Http
     , orderBookTickerFor
     ) where
 
+import Lambdabox.Box
 import Binance.Internal.MarketData.Types
-import Binance.Internal.Types
 import Network.Wreq.Extended
 import Data.Text (Text)
 
-orderBook :: Text -> Maybe Int -> Binance OrderBook
+orderBook :: Text -> Maybe Int -> Box OrderBook
 orderBook s limit = get "/api/v1/depth" $ [("symbol", s)]  
                                 ++ optionalParams ["limit" :? limit]
 
-recentTrades :: Text -> Maybe Int -> Binance [Trade]
+recentTrades :: Text -> Maybe Int -> Box [Trade]
 recentTrades s limit = get "/api/v1/trades" $ [("symbol", s)]
                                 ++ optionalParams ["limit" :? limit]
 
-historicalTrades :: Text -> Maybe Int -> Maybe Int -> Binance [Trade]
+historicalTrades :: Text -> Maybe Int -> Maybe Int -> Box [Trade]
 historicalTrades s limit fromId = get "/api/v1/historicalTrades" $ 
                                         [("symbol", s)] ++ optionalParams 
                                         ["limit" :? limit, "fromId" :? fromId]
@@ -37,7 +37,7 @@ aggregatedTrades :: Text
                     -> Maybe Int 
                     -> Maybe Int 
                     -> Maybe Int 
-                    -> Binance [AggregatedTrade]
+                    -> Box [AggregatedTrade]
 aggregatedTrades symbol fromId startTime endTime limit =
     get "/api/v1/aggTrades" $ [("symbol", symbol)] ++ optionalParams 
         [ "fromId"    :? fromId
@@ -50,7 +50,7 @@ candlestickData :: Text
                 -> Maybe Int
                 -> Maybe Int
                 -> Maybe Int
-                -> Binance [Candlestick]
+                -> Box [Candlestick]
 candlestickData symbol interval limit startTime endTime =
     get "/api/v1/klines" $ 
         [("symbol", symbol), ("interval", toText interval)] ++
@@ -58,22 +58,22 @@ candlestickData symbol interval limit startTime endTime =
                         , "startTime" :? startTime
                         , "endTime"   :? endTime ]
 
-dayPriceChangeStatistics :: Binance [DayPriceChange]
+dayPriceChangeStatistics :: Box [DayPriceChange]
 dayPriceChangeStatistics = get "/api/v1/ticker/24hr" []
 
-dayPriceChangeStatisticsFor :: Text -> Binance DayPriceChange
+dayPriceChangeStatisticsFor :: Text -> Box DayPriceChange
 dayPriceChangeStatisticsFor symbol = 
     get "/api/v1/ticker/24hr" [("symbol", symbol)]
 
-latestPrice :: Binance [LatestPrice]
+latestPrice :: Box [LatestPrice]
 latestPrice = get "/api/v3/ticker/price" []
 
-latestPriceFor :: Text -> Binance LatestPrice
+latestPriceFor :: Text -> Box LatestPrice
 latestPriceFor symbol = get "/api/v3/ticker/price" [("symbol", symbol)]
 
-orderBookTicker :: Binance [OrderBookTicker]
+orderBookTicker :: Box [OrderBookTicker]
 orderBookTicker = get "/api/v3/ticker/bookTicker" []
 
-orderBookTickerFor :: Text -> Binance OrderBookTicker
+orderBookTickerFor :: Text -> Box OrderBookTicker
 orderBookTickerFor symbol = get "/api/v3/ticker/bookTicker" 
                                     [("symbol", symbol)]

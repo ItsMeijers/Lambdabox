@@ -11,7 +11,7 @@ module Binance.Internal.Trade.Http
     , cancelOrderOnClientId
     ) where
 
-import Binance.Internal.Types
+import Lambdabox.Box
 import Binance.Internal.Trade.Types
 import Network.Wreq.Extended
 import Data.Text (Text)
@@ -26,7 +26,7 @@ trade :: Text
       -> Maybe Text 
       -> Maybe ResponseType 
       -> Maybe Int 
-      -> Binance BinanceOrderResponse
+      -> Box BinanceOrderResponse
 trade symbol side binanceOrder newClientOrderId responseType recvWindow = 
     prepareTrade symbol side binanceOrder newClientOrderId responseType 
         recvWindow (postSigned "/api/v3/order")
@@ -41,11 +41,11 @@ testTrade :: Text
           -> Maybe Text 
           -> Maybe ResponseType 
           -> Maybe Int 
-          -> Binance ()
+          -> Box ()
 testTrade symbol side binanceOrder newClientOrderId responseType recvWindow = 
     prepareTrade symbol side binanceOrder newClientOrderId responseType 
         recvWindow  (fmap (const ()) . 
-            (postSigned "/api/v3/order/test" :: [(Text, Text)] -> Binance Unit))
+            (postSigned "/api/v3/order/test" :: [(Text, Text)] -> Box Unit))
 
 -- | Prepares the trade for sending for both the trade and testTrade function.            
 prepareTrade :: Text 
@@ -54,8 +54,8 @@ prepareTrade :: Text
              -> Maybe Text 
              -> Maybe ResponseType 
              -> Maybe Int
-             -> ([(Text, Text)] -> Binance a) 
-             -> Binance a
+             -> ([(Text, Text)] -> Box a) 
+             -> Box a
 prepareTrade s side binanceOrder newClientOrderId responseType recvWindow f = 
     let standardParams = [("symbol", s), ("side", toText side)]
         orderParams    = paramsFromOrder binanceOrder
@@ -110,13 +110,13 @@ paramsFromOrder BinanceLimitMaker { qtyLM, priceLM } =
     , ("price", toText priceLM)
     ]
 
-queryOrderOnId :: Text -> Int -> Maybe Int -> Binance PlacedOrder
+queryOrderOnId :: Text -> Int -> Maybe Int -> Box PlacedOrder
 queryOrderOnId symbol orderId recvWindow = 
     getSigned "/api/v3/order" $ [ ("symbol", symbol)
                                 , ("orderId", toText orderId)
                                 ] ++ optionalParams ["recvWindow" :? recvWindow] 
 
-queryOrderOnClientId :: Text -> Text -> Maybe Int -> Binance PlacedOrder
+queryOrderOnClientId :: Text -> Text -> Maybe Int -> Box PlacedOrder
 queryOrderOnClientId symbol origClientOrderId recvWindow = 
     getSigned "/api/v3/order" $ [ ("symbol", symbol)
                                 , ("origClientOrderId", origClientOrderId)
@@ -126,7 +126,7 @@ cancelOrderOnId :: Text
                 -> Int  
                 -> Maybe Text 
                 -> Maybe Int 
-                -> Binance CancelOrder
+                -> Box CancelOrder
 cancelOrderOnId symbol orderId newClientOrderId recvWindow = 
     deleteSigned "/api/v3/order" $ [ ("symbol", symbol)
                                    , ("orderId", toText orderId)
@@ -139,7 +139,7 @@ cancelOrderOnClientId :: Text
                 -> Text  
                 -> Maybe Text 
                 -> Maybe Int 
-                -> Binance CancelOrder
+                -> Box CancelOrder
 cancelOrderOnClientId symbol origClientOrderId newClientOrderId recvWindow = 
     deleteSigned "/api/v3/order" $ [ ("symbol", symbol)
                                     , ("orderId", origClientOrderId)
@@ -149,13 +149,13 @@ cancelOrderOnClientId symbol origClientOrderId newClientOrderId recvWindow =
                                     ]
 
 -- | List all the order status that are currently open on Binance.
-currentOpenOrders :: Maybe Text -> Maybe Int -> Binance [OrderStatus]
+currentOpenOrders :: Maybe Text -> Maybe Int -> Box [OrderStatus]
 currentOpenOrders symbol recvWindow = 
     getSigned "/api/v3/openOrders" $ optionalParams 
                             ["symbol" :? symbol, "recvWindow" :? recvWindow]
 
 -- | List all the orders on Binance.
-allOrders :: Text -> Maybe Int -> Maybe Int -> Maybe Int -> Binance [PlacedOrder]
+allOrders :: Text -> Maybe Int -> Maybe Int -> Maybe Int -> Box [PlacedOrder]
 allOrders symbol orderId limit recvWindow =
     getSigned "/api/v3/allOrders" $ [("symbol", symbol)] ++ optionalParams
         ["orderId" :? orderId, "limit" :? limit, "recvWindow" :? recvWindow]

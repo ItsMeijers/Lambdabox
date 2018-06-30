@@ -1,6 +1,15 @@
+{-# LANGUAGE OverloadedStrings, MultiParamTypeClasses #-}
+
 module Lambdabox.Symbol where
 
-class Symbol a where
+import qualified Data.Text as T
+import Lambdabox.Exchange
+import Lambdabox.Translate
+
+class (Show a) => Symbol a
+
+instance (Symbol a, Symbol b) => Translate Binance (a,b) T.Text where
+    translate _ (a, b) = (T.pack (show a)) `T.append` "/" `T.append` (T.pack (show b))
 
 -- | Bootstrap based on an API Call
 data BTC   = BTC deriving Show
