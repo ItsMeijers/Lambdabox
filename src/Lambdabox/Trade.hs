@@ -85,7 +85,25 @@ iceberg :: Icebergable e a b
         -> Order
         -> Double
         -> Box OrderResponse
-iceberg es o = undefined
+iceberg (ExchangePair e a b, s) o icebergQuantity
+    | isBinance e = icebergBinanceOrder a b s o icebergQuantity
+    | otherwise   = liftIO $ ioError $ userError "Not implemented Exchange found!"
+
+
+icebergBinanceOrder :: (Symbol a, Symbol b)
+                    => a
+                    -> b
+                    -> Side
+                    -> Order
+                    -> Double
+                    -> Box OrderResponse
+icebergBinanceOrder a b side order iceQty = do
+    let symbol   = translate Binance (a, b)
+        bSide    = translate Binance side
+        bOrder   = translate Binance (IcebergOrder order iceQty)
+    response     <- BI.trade symbol bSide bOrder Nothing Nothing Nothing -- TODO add a way to incorperate the recvWindow etc
+    return $ translate Binance response
+
 
 -- | Test an iceberging trade based on a Symbol, an Exchange and an Order
 testIceberg :: Icebergable e a b
@@ -93,4 +111,19 @@ testIceberg :: Icebergable e a b
             -> Order
             -> Double
             -> Box ()
-testIceberg es o = undefined
+testIceberg (ExchangePair e a b, s) o icebergQuantity
+    | isBinance e = testIcebergBinanceOrder a b s o icebergQuantity
+    | otherwise   = liftIO $ ioError $ userError "Not implemented Exchange found!"
+
+testIcebergBinanceOrder :: (Symbol a, Symbol b)
+                        => a
+                        -> b
+                        -> Side
+                        -> Order
+                        -> Double
+                        -> Box ()
+testIcebergBinanceOrder a b side order iceQty = do
+    let symbol   = translate Binance (a, b)
+        bSide    = translate Binance side
+        bOrder   = translate Binance (IcebergOrder order iceQty)
+    BI.testTrade symbol bSide bOrder Nothing Nothing Nothing 
