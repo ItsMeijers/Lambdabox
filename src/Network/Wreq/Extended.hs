@@ -103,7 +103,6 @@ httpRequest :: forall a. (FromJSON a)
             -> Box a
 httpRequest request uri params = do
     boxConfiguration <- ask
-    _              <- liftIO $ putStrLn $ show $ buildOptions boxConfiguration params
     response       <- liftIO $ request 
                                 (buildOptions boxConfiguration params) 
                                 ("https://api.binance.com" ++ uri)
